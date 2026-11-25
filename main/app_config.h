@@ -43,6 +43,11 @@
 #define CONFIG_TEMP_WINTER_SEASON_MAX       18.0f  // 18℃未満は暖房/冬プロファイル
 #define CONFIG_TEMP_SUMMER_SEASON_MIN       24.0f  // 24℃以上は冷房/夏プロファイル
 
+// Midday Peak Ventilation Settings (冬〜春 日中換気: 11:00〜14:00, 照度>=500lx, 外気温>=20℃, 1日1回限定)
+#define CONFIG_VENT_HOUR_START              11     // 11:00
+#define CONFIG_VENT_HOUR_END                14     // 14:00
+#define CONFIG_LUX_MIDDAY_VENT_MIN          500.0f // 日照基準 (500 lx以上)
+#define CONFIG_TEMP_MIDDAY_VENT_MIN         20.0f  // 外気温基準 (20.0℃以上)
 
 // Onboard LED Settings (ESP32-S3 SuperMini has blue LED on GPIO 8, Active-Low: 1 = OFF)
 #define CONFIG_ONBOARD_LED_GPIO             8
@@ -53,5 +58,6 @@
 #define AUDIO_WINTER_COLD_CLOSE_PATH    "/win_close.mp3"
 #define AUDIO_SUMMER_HOT_CLOSE_PATH     "/sum_close.mp3"
 #define AUDIO_SUMMER_COOL_OPEN_PATH     "/sum_open.mp3"
+#define AUDIO_MIDDAY_VENT_PATH          "/mid_vent.mp3"
 #define AUDIO_TEST_PATH                 "/test.mp3"
 

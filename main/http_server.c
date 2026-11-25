@@ -185,6 +185,7 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "<div class=\"audio-item\"><label>冬・断熱（閉）(win_close.mp3)</label><audio controls preload=\"none\" src=\"/win_close.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏・遮熱（閉）(sum_close.mp3)</label><audio controls preload=\"none\" src=\"/sum_close.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏・排熱（開）(sum_open.mp3)</label><audio controls preload=\"none\" src=\"/sum_open.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬春・日中換気（窓開け）(mid_vent.mp3)</label><audio controls preload=\"none\" src=\"/mid_vent.mp3\"></audio></div>"
         "</div>"
         "</div>"
         "<script>"

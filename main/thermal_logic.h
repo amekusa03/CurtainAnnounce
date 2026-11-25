@@ -14,7 +14,8 @@ typedef enum {
     ANNOUNCE_WINTER_LIGHT_OPEN,   // 冬・採光（開）
     ANNOUNCE_WINTER_COLD_CLOSE,   // 冬・断熱（閉）
     ANNOUNCE_SUMMER_HOT_CLOSE,    // 夏・遮熱（閉）
-    ANNOUNCE_SUMMER_COOL_OPEN     // 夏・排熱（開）
+    ANNOUNCE_SUMMER_COOL_OPEN,    // 夏・排熱（開）
+    ANNOUNCE_MIDDAY_VENT_OPEN     // 冬〜春・日中換気（窓開け推奨）
 } announce_action_t;
 
 typedef struct {

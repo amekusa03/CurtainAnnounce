@@ -11,6 +11,7 @@ static int s_sample_count = 0;
 static int s_head_idx = 0;
 static curtain_state_t s_curtain_state = CURTAIN_STATE_UNKNOWN;
 static time_t s_last_announce_time = 0;
+static int s_last_vent_yday = -1; // 年間通日(0〜365): 1日1回限定換気追跡用
 
 void thermal_logic_init(void)
 {
@@ -18,6 +19,7 @@ void thermal_logic_init(void)
     s_head_idx = 0;
     s_curtain_state = CURTAIN_STATE_UNKNOWN;
     s_last_announce_time = 0;
+    s_last_vent_yday = -1;
 }
 
 void thermal_logic_add_sample(float outdoor_temp, float lux, float indoor_temp)
@@ -103,6 +105,18 @@ announce_action_t thermal_logic_evaluate(void)
 
     announce_action_t action = ANNOUNCE_NONE;
 
+    // 冬〜春 日中換気判定 (11:00〜14:00, 照度500lx以上, 外気温20℃以上, 1日1回限定)
+    if (hour >= CONFIG_VENT_HOUR_START && hour < CONFIG_VENT_HOUR_END) {
+        struct tm ti;
+        localtime_r(&now, &ti);
+        if (s_last_vent_yday != ti.tm_yday) {
+            if (current_lux >= CONFIG_LUX_MIDDAY_VENT_MIN && current_temp >= CONFIG_TEMP_MIDDAY_VENT_MIN) {
+                ESP_LOGI(TAG, "Triggered Midday Vent Condition: Lux=%.1f, Temp=%.1f C", current_lux, current_temp);
+                return ANNOUNCE_MIDDAY_VENT_OPEN;
+            }
+        }
+    }
+
     if (is_cold_season) {
         // 冬・採光（開）: 室内が明るくなり始め(180lx以上)、光量上昇 ＋ 気温上昇傾向
         if (current_lux >= CONFIG_LUX_WINTER_OPEN_MIN && lux_slope > 10.0f && temp_slope >= -0.1f) {
@@ -149,6 +163,11 @@ void thermal_logic_confirm_action(announce_action_t action)
         s_curtain_state = CURTAIN_STATE_OPEN;
     } else if (action == ANNOUNCE_WINTER_COLD_CLOSE || action == ANNOUNCE_SUMMER_HOT_CLOSE) {
         s_curtain_state = CURTAIN_STATE_CLOSED;
+    } else if (action == ANNOUNCE_MIDDAY_VENT_OPEN) {
+        struct tm ti;
+        localtime_r(&s_last_announce_time, &ti);
+        s_last_vent_yday = ti.tm_yday;
+        ESP_LOGI(TAG, "Midday ventilation recorded for day of year: %d", s_last_vent_yday);
     }
 }
 
@@ -159,6 +178,7 @@ const char* thermal_logic_action_to_str(announce_action_t action)
         case ANNOUNCE_WINTER_COLD_CLOSE: return "冬・断熱（閉）: 日が落ちて冷え込んできました。カーテンを閉めて暖気を逃がさないようにしましょう。";
         case ANNOUNCE_SUMMER_HOT_CLOSE:  return "夏・遮熱（閉）: 日差しが強くなっています。カーテンを閉めて室温の上昇を防ぎましょう。";
         case ANNOUNCE_SUMMER_COOL_OPEN:  return "夏・排熱（開）: 外が涼しくなりました。カーテンを開けて熱気を逃がしましょう。";
+        case ANNOUNCE_MIDDAY_VENT_OPEN:  return "日中換気（窓開け）: 外が暖かくなってきました。少し窓を開けて、空気の入れ替えはいかがですか？";
         default:                         return "アナウンスなし";
     }
 }
@@ -170,6 +190,7 @@ const char* thermal_logic_action_to_title(announce_action_t action)
         case ANNOUNCE_WINTER_COLD_CLOSE: return "冬・断熱（閉）";
         case ANNOUNCE_SUMMER_HOT_CLOSE:  return "夏・遮熱（閉）";
         case ANNOUNCE_SUMMER_COOL_OPEN:  return "夏・排熱（開）";
+        case ANNOUNCE_MIDDAY_VENT_OPEN:  return "日中換気（窓開け）";
         default:                         return "アナウンスなし";
     }
 }
@@ -181,6 +202,7 @@ const char* thermal_logic_action_to_audio_path(announce_action_t action)
         case ANNOUNCE_WINTER_COLD_CLOSE: return AUDIO_WINTER_COLD_CLOSE_PATH;
         case ANNOUNCE_SUMMER_HOT_CLOSE:  return AUDIO_SUMMER_HOT_CLOSE_PATH;
         case ANNOUNCE_SUMMER_COOL_OPEN:  return AUDIO_SUMMER_COOL_OPEN_PATH;
+        case ANNOUNCE_MIDDAY_VENT_OPEN:  return AUDIO_MIDDAY_VENT_PATH;
         default:                         return AUDIO_TEST_PATH;
     }
 }
