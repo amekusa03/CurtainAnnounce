@@ -186,6 +186,8 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "<div class=\"audio-item\"><label>夏・遮熱（閉）(sum_close.mp3)</label><audio controls preload=\"none\" src=\"/sum_close.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏・排熱（開）(sum_open.mp3)</label><audio controls preload=\"none\" src=\"/sum_open.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>冬春・日中換気（窓開け）(mid_vent.mp3)</label><audio controls preload=\"none\" src=\"/mid_vent.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏秋・夕涼み（窓開け）(night_purge.mp3)</label><audio controls preload=\"none\" src=\"/night_purge.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏・朝の外気逆転（窓閉め）(morning_close.mp3)</label><audio controls preload=\"none\" src=\"/morning_close.mp3\"></audio></div>"
         "</div>"
         "</div>"
         "<script>"

@@ -9,6 +9,7 @@ idf_component_register(
         "thermal_logic.c"
         "cast_client.c"
         "announce_history.c"
+        "web_reporter.c"
     INCLUDE_DIRS "."
     REQUIRES
         nvs_flash

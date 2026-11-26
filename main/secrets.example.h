@@ -21,3 +21,8 @@
 // Outdoor Data API Endpoint (e.g. SwitchBot sensor board)
 #define CONFIG_WEATHER_API_URL      "http://esp32-switchbot.local/api/sensor"
 #define CONFIG_WEATHER_API_TOKEN    ""
+
+// Curtain Announce Cloud Web Report API (Vercel)
+#define CONFIG_CURTAIN_REPORT_URL   "https://amekusa.vercel.app/api/curtain"
+#define CONFIG_CURTAIN_API_KEY      "YOUR_API_SECRET_KEY"
+

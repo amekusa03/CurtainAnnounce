@@ -49,6 +49,18 @@
 #define CONFIG_LUX_MIDDAY_VENT_MIN          500.0f // 日照基準 (500 lx以上)
 #define CONFIG_TEMP_MIDDAY_VENT_MIN         20.0f  // 外気温基準 (20.0℃以上)
 
+// Night Purge Window Open Settings (夏〜秋 夕涼み・ナイトパージ: 17:00〜21:00, 室温>=25℃, 外気温<室温-2℃, 外気温>=19℃, 1日1回限定)
+#define CONFIG_NIGHT_PURGE_HOUR_START       17     // 17:00
+#define CONFIG_NIGHT_PURGE_HOUR_END         21     // 21:00
+#define CONFIG_TEMP_NIGHT_PURGE_ROOM_MIN    25.0f  // 室温 >= 25℃
+#define CONFIG_TEMP_NIGHT_PURGE_OUT_MIN     19.0f  // 外気温 >= 19℃（冷えすぎない快適域）
+#define CONFIG_TEMP_NIGHT_PURGE_DIFF_MIN    2.0f   // 室温 - 外気温 > 2.0℃ (外気温 < 室温 - 2℃)
+
+// Morning Window Close Settings (夏の朝 外気逆転・窓閉め: 06:00〜11:00, 外気温 >= 室温のクロスオーバー検知, 1日1回限定)
+#define CONFIG_MORNING_CLOSE_HOUR_START     6      // 06:00
+#define CONFIG_MORNING_CLOSE_HOUR_END       11     // 11:00
+#define CONFIG_TEMP_MORNING_CLOSE_ROOM_MIN  20.0f  // 温暖期の朝であることを担保（室温 >= 20℃）
+
 // Onboard LED Settings (ESP32-S3 SuperMini has blue LED on GPIO 8, Active-Low: 1 = OFF)
 #define CONFIG_ONBOARD_LED_GPIO             8
 #define CONFIG_ONBOARD_LED_OFF_LEVEL        1
@@ -59,5 +71,7 @@
 #define AUDIO_SUMMER_HOT_CLOSE_PATH     "/sum_close.mp3"
 #define AUDIO_SUMMER_COOL_OPEN_PATH     "/sum_open.mp3"
 #define AUDIO_MIDDAY_VENT_PATH          "/mid_vent.mp3"
+#define AUDIO_NIGHT_PURGE_PATH          "/night_purge.mp3"
+#define AUDIO_MORNING_CLOSE_PATH        "/morning_close.mp3"
 #define AUDIO_TEST_PATH                 "/test.mp3"
 

@@ -16,8 +16,12 @@
 #include "thermal_logic.h"
 #include "cast_client.h"
 #include "announce_history.h"
+#include "web_reporter.h"
 
 static const char *TAG = "MAIN_APP";
+
+static char s_last_action_title[64] = "なし";
+static char s_last_action_time[64] = "";
 
 static void monitor_task(void *pvParameters)
 {
@@ -84,6 +88,33 @@ static void monitor_task(void *pvParameters)
                                      weather.indoor_temp,
                                      weather.lux,
                                      is_ok);
+
+                // Update last action info
+                const char *title = thermal_logic_action_to_title(action);
+                strncpy(s_last_action_title, title, sizeof(s_last_action_title) - 1);
+                s_last_action_title[sizeof(s_last_action_title) - 1] = '\0';
+
+                time_t now = ntp_client_get_now();
+                if (now == 0) now = time(NULL);
+                struct tm ti;
+                localtime_r(&now, &ti);
+                strftime(s_last_action_time, sizeof(s_last_action_time), "%Y-%m-%d %H:%M", &ti);
+
+                // Immediate report on triggered action
+                web_reporter_send(weather.outdoor_temp,
+                                  weather.indoor_temp,
+                                  weather.lux,
+                                  thermal_logic_get_curtain_state(),
+                                  s_last_action_title,
+                                  s_last_action_time);
+            } else {
+                // Periodic 5-minute report
+                web_reporter_send(weather.outdoor_temp,
+                                  weather.indoor_temp,
+                                  weather.lux,
+                                  thermal_logic_get_curtain_state(),
+                                  s_last_action_title,
+                                  s_last_action_time);
             }
         } else {
             ESP_LOGW(TAG, "Failed to fetch weather data.");
@@ -136,6 +167,9 @@ void app_main(void)
 
     // 5. Initialize Cast Client
     ESP_ERROR_CHECK(cast_client_init());
+
+    // 5.1 Initialize Web Reporter
+    ESP_ERROR_CHECK(web_reporter_init());
 
     // 6. Initialize Wi-Fi
     ESP_LOGI(TAG, "Connecting to Wi-Fi...");
