@@ -39,15 +39,27 @@
 #define CONFIG_LUX_SUMMER_HOT_CLOSE         1000.0f// 夏の昼: 強い直射日光（遮熱）
 #define CONFIG_LUX_SUMMER_COOL_OPEN         150.0f // 夏の夕〜夜: 日射消失（排熱）
 
-// Temperature Thresholds
+// Temperature & Seasonal Thresholds
 #define CONFIG_TEMP_WINTER_SEASON_MAX       18.0f  // 18℃未満は暖房/冬プロファイル
 #define CONFIG_TEMP_SUMMER_SEASON_MIN       24.0f  // 24℃以上は冷房/夏プロファイル
 
-// Midday Peak Ventilation Settings (冬〜春 日中換気: 11:00〜14:00, 照度>=500lx, 外気温>=20℃, 1日1回限定)
+// Season Calendar Definitions (1〜12月)
+#define CONFIG_SEASON_SUMMER_START_MONTH    6   // 6月 (夏季冷房期開始)
+#define CONFIG_SEASON_SUMMER_END_MONTH      9   // 9月 (夏季冷房期終了)
+#define CONFIG_SEASON_AUTUMN_VENT_END_MONTH 10  // 10月 (秋の夕涼み換気終了)
+#define CONFIG_SEASON_WINTER_START_MONTH    11  // 11月 (冬春暖房・採光期開始)
+#define CONFIG_SEASON_WINTER_END_MONTH      4   // 4月 (冬春暖房・採光期終了)
+
+// Midday Peak Ventilation Settings (冬〜春 日中換気: 11:00〜14:00, 照度>=300lx, 外気温>=20℃, 1日1回限定)
 #define CONFIG_VENT_HOUR_START              11     // 11:00
 #define CONFIG_VENT_HOUR_END                14     // 14:00
-#define CONFIG_LUX_MIDDAY_VENT_MIN          500.0f // 日照基準 (500 lx以上)
+#define CONFIG_LUX_MIDDAY_VENT_MIN          300.0f // 日照基準 (300 lx以上: 室内が十分に明るいレベル)
 #define CONFIG_TEMP_MIDDAY_VENT_MIN         20.0f  // 外気温基準 (20.0℃以上)
+
+// Winter Window Close Settings (冬春 窓閉め: 窓OPEN時、室温<=20℃ または (外気温+3℃)<室温、または16:00以降, 1日1回限定)
+#define CONFIG_WINTER_CLOSE_ROOM_TEMP_MIN   20.0f  // 室温が20℃以下になったら閉める
+#define CONFIG_WINTER_CLOSE_TEMP_DIFF       3.0f   // (外気 + 3.0℃) < 室温 で冷え込み判定
+#define CONFIG_WINTER_CLOSE_HOUR_LATE       16     // 16:00以降は冷え込み防止のため窓閉め
 
 // Night Purge Window Open Settings (夏〜秋 夕涼み・ナイトパージ: 17:00〜21:00, 室温>=25℃, 外気温<室温-2℃, 外気温>=19℃, 1日1回限定)
 #define CONFIG_NIGHT_PURGE_HOUR_START       17     // 17:00
@@ -71,6 +83,7 @@
 #define AUDIO_SUMMER_HOT_CLOSE_PATH     "/sum_close.mp3"
 #define AUDIO_SUMMER_COOL_OPEN_PATH     "/sum_open.mp3"
 #define AUDIO_MIDDAY_VENT_PATH          "/mid_vent.mp3"
+#define AUDIO_WINTER_WINDOW_CLOSE_PATH  "/win_vent_close.mp3"
 #define AUDIO_NIGHT_PURGE_PATH          "/night_purge.mp3"
 #define AUDIO_MORNING_CLOSE_PATH        "/morning_close.mp3"
 #define AUDIO_TEST_PATH                 "/test.mp3"

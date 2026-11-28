@@ -26,10 +26,20 @@ static const char* curtain_state_str(curtain_state_t state)
     }
 }
 
+static const char* window_state_str(window_state_t state)
+{
+    switch (state) {
+        case WINDOW_STATE_OPEN:   return "OPEN";
+        case WINDOW_STATE_CLOSED: return "CLOSED";
+        default:                  return "UNKNOWN";
+    }
+}
+
 esp_err_t web_reporter_send(float outdoor_temp,
                             float indoor_temp,
                             float lux,
                             curtain_state_t curtain_state,
+                            window_state_t window_state,
                             const char *last_action,
                             const char *action_time)
 {
@@ -49,6 +59,7 @@ esp_err_t web_reporter_send(float outdoor_temp,
     cJSON_AddNumberToObject(root, "indoor_temp", indoor_temp);
     cJSON_AddNumberToObject(root, "lux", lux);
     cJSON_AddStringToObject(root, "curtain_state", curtain_state_str(curtain_state));
+    cJSON_AddStringToObject(root, "window_state", window_state_str(window_state));
     cJSON_AddStringToObject(root, "last_action", last_action ? last_action : "なし");
     cJSON_AddStringToObject(root, "action_time", action_time ? action_time : "");
 

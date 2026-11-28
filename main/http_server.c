@@ -66,16 +66,17 @@ static esp_err_t status_api_handler(httpd_req_t *req)
 {
     climate_sample_t latest;
     bool has_sample = thermal_logic_get_latest_sample(&latest);
-    curtain_state_t state = thermal_logic_get_curtain_state();
+    curtain_state_t c_state = thermal_logic_get_curtain_state();
+    window_state_t w_state = thermal_logic_get_window_state();
 
-    const char *state_str = "未判定";
-    if (state == CURTAIN_STATE_OPEN) state_str = "開（採光・通風中）";
-    else if (state == CURTAIN_STATE_CLOSED) state_str = "閉（保温・遮熱中）";
+    const char *c_state_str = thermal_logic_curtain_state_to_str(c_state);
+    const char *w_state_str = thermal_logic_window_state_to_str(w_state);
 
-    char resp[384];
+    char resp[450];
     snprintf(resp, sizeof(resp),
-        "{\"curtain_state\":\"%s\",\"outdoor_temp\":%.1f,\"indoor_temp\":%.1f,\"lux\":%.1f,\"has_sample\":%s}",
-        state_str,
+        "{\"curtain_state\":\"%s\",\"window_state\":\"%s\",\"outdoor_temp\":%.1f,\"indoor_temp\":%.1f,\"lux\":%.1f,\"has_sample\":%s}",
+        c_state_str,
+        w_state_str,
         has_sample ? latest.outdoor_temp : 0.0f,
         has_sample ? latest.indoor_temp : 0.0f,
         has_sample ? latest.lux : 0.0f,
@@ -130,17 +131,17 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "<!DOCTYPE html>"
         "<html lang=\"ja\"><head><meta charset=\"UTF-8\">"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-        "<title>Curtain Announce System</title>"
+        "<title>窓とカーテン開閉予測システム</title>"
         "<style>"
         "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:16px;background:#f0f2f5;color:#333;}"
         ".container{max-width:680px;margin:0 auto;}"
         ".card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}"
         "h1{font-size:20px;margin:0 0 12px 0;color:#1a73e8;display:flex;align-items:center;gap:8px;}"
         "h2{font-size:15px;margin:0 0 12px 0;color:#555;border-bottom:1px solid #eee;padding-bottom:6px;}"
-        ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px;}"
+        ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px;}"
         ".stat-box{background:#f8f9fa;border-radius:8px;padding:12px;text-align:center;}"
         ".stat-label{font-size:12px;color:#777;margin-bottom:4px;}"
-        ".stat-val{font-size:18px;font-weight:bold;color:#1a73e8;}"
+        ".stat-val{font-size:17px;font-weight:bold;color:#1a73e8;}"
         ".btn{background:#1a73e8;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-size:15px;cursor:pointer;width:100%;font-weight:bold;transition:0.2s;}"
         ".btn:hover{background:#1557b0;}"
         "#cast-msg{margin-top:8px;font-size:13px;color:#28a745;display:none;text-align:center;}"
@@ -157,11 +158,12 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "</style></head><body>"
         "<div class=\"container\">"
         "<div class=\"card\">"
-        "<h1>🏠 カーテン開閉予測システム</h1>"
+        "<h1>🏠 窓とカーテン開閉予測システム</h1>"
         "<p style=\"font-size:13px;color:#666;margin:0 0 16px 0;\">Google Home (192.168.11.7) 連携中</p>"
         "<h2>現在ステータス</h2>"
         "<div class=\"grid\">"
         "<div class=\"stat-box\"><div class=\"stat-label\">カーテン状態</div><div class=\"stat-val\" id=\"curtain-state\">--</div></div>"
+        "<div class=\"stat-box\"><div class=\"stat-label\">窓 状態</div><div class=\"stat-val\" id=\"window-state\">--</div></div>"
         "<div class=\"stat-box\"><div class=\"stat-label\">外気照度</div><div class=\"stat-val\" id=\"lux-val\">-- lx</div></div>"
         "<div class=\"stat-box\"><div class=\"stat-label\">外気温</div><div class=\"stat-val\" id=\"out-temp-val\">-- ℃</div></div>"
         "<div class=\"stat-box\"><div class=\"stat-label\">室内温度</div><div class=\"stat-val\" id=\"in-temp-val\">-- ℃</div></div>"
@@ -186,6 +188,7 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "<div class=\"audio-item\"><label>夏・遮熱（閉）(sum_close.mp3)</label><audio controls preload=\"none\" src=\"/sum_close.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏・排熱（開）(sum_open.mp3)</label><audio controls preload=\"none\" src=\"/sum_open.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>冬春・日中換気（窓開け）(mid_vent.mp3)</label><audio controls preload=\"none\" src=\"/mid_vent.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬春・冷え込み窓閉め (win_vent_close.mp3)</label><audio controls preload=\"none\" src=\"/win_vent_close.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏秋・夕涼み（窓開け）(night_purge.mp3)</label><audio controls preload=\"none\" src=\"/night_purge.mp3\"></audio></div>"
         "<div class=\"audio-item\"><label>夏・朝の外気逆転（窓閉め）(morning_close.mp3)</label><audio controls preload=\"none\" src=\"/morning_close.mp3\"></audio></div>"
         "</div>"
@@ -194,6 +197,7 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "function updateStatus(){"
         "  fetch('/api/status').then(r=>r.json()).then(d=>{"
         "    document.getElementById('curtain-state').innerText = d.curtain_state || '--';"
+        "    document.getElementById('window-state').innerText = d.window_state || '--';"
         "    document.getElementById('lux-val').innerText = d.has_sample ? d.lux.toFixed(1)+' lx' : '--';"
         "    document.getElementById('out-temp-val').innerText = d.has_sample ? d.outdoor_temp.toFixed(1)+' ℃' : '--';"
         "    document.getElementById('in-temp-val').innerText = d.has_sample ? d.indoor_temp.toFixed(1)+' ℃' : '--';"

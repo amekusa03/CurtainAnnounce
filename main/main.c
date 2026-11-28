@@ -25,7 +25,7 @@ static char s_last_action_time[64] = "";
 
 static void monitor_task(void *pvParameters)
 {
-    ESP_LOGI(TAG, "Starting Curtain Announce Monitor Loop...");
+    ESP_LOGI(TAG, "Starting Window & Curtain Announce Monitor Loop...");
 
     // Wait until Wi-Fi is connected
     while (!wifi_manager_is_connected()) {
@@ -105,6 +105,7 @@ static void monitor_task(void *pvParameters)
                                   weather.indoor_temp,
                                   weather.lux,
                                   thermal_logic_get_curtain_state(),
+                                  thermal_logic_get_window_state(),
                                   s_last_action_title,
                                   s_last_action_time);
             } else {
@@ -113,6 +114,7 @@ static void monitor_task(void *pvParameters)
                                   weather.indoor_temp,
                                   weather.lux,
                                   thermal_logic_get_curtain_state(),
+                                  thermal_logic_get_window_state(),
                                   s_last_action_title,
                                   s_last_action_time);
             }
@@ -142,7 +144,7 @@ static void init_onboard_led(void)
 
 void app_main(void)
 {
-    ESP_LOGI(TAG, "=== ESP32-S3 Curtain Announce System Starting ===");
+    ESP_LOGI(TAG, "=== ESP32-S3 Window & Curtain Announce System Starting ===");
 
     // 0. Turn off onboard LED if present
     init_onboard_led();
