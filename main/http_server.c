@@ -183,14 +183,14 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "<div class=\"card\">"
         "<h2>内蔵音声ファイル一覧（ブラウザ試聴）</h2>"
         "<div class=\"audio-item\"><label>テスト音声 (test.mp3)</label><audio controls preload=\"none\" src=\"/test.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>冬・採光（開）(win_open.mp3)</label><audio controls preload=\"none\" src=\"/win_open.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>冬・断熱（閉）(win_close.mp3)</label><audio controls preload=\"none\" src=\"/win_close.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>夏・遮熱（閉）(sum_close.mp3)</label><audio controls preload=\"none\" src=\"/sum_close.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>夏・排熱（開）(sum_open.mp3)</label><audio controls preload=\"none\" src=\"/sum_open.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>冬春・日中換気（窓開け）(mid_vent.mp3)</label><audio controls preload=\"none\" src=\"/mid_vent.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>冬春・冷え込み窓閉め (win_vent_close.mp3)</label><audio controls preload=\"none\" src=\"/win_vent_close.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>夏秋・夕涼み（窓開け）(night_purge.mp3)</label><audio controls preload=\"none\" src=\"/night_purge.mp3\"></audio></div>"
-        "<div class=\"audio-item\"><label>夏・朝の外気逆転（窓閉め）(morning_close.mp3)</label><audio controls preload=\"none\" src=\"/morning_close.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬・採光【カーテン開】(win_open.mp3)</label><audio controls preload=\"none\" src=\"/win_open.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬・断熱【カーテン閉】(win_close.mp3)</label><audio controls preload=\"none\" src=\"/win_close.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏・遮熱【カーテン閉】(sum_close.mp3)</label><audio controls preload=\"none\" src=\"/sum_close.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏・排熱【カーテン開】(sum_open.mp3)</label><audio controls preload=\"none\" src=\"/sum_open.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬春・日中換気【窓開け】(mid_vent.mp3)</label><audio controls preload=\"none\" src=\"/mid_vent.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>冬春・冷え込み【窓閉め】(win_vent_close.mp3)</label><audio controls preload=\"none\" src=\"/win_vent_close.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏秋・夕涼み【窓開け】(night_purge.mp3)</label><audio controls preload=\"none\" src=\"/night_purge.mp3\"></audio></div>"
+        "<div class=\"audio-item\"><label>夏・朝の外気逆転【窓閉め】(morning_close.mp3)</label><audio controls preload=\"none\" src=\"/morning_close.mp3\"></audio></div>"
         "</div>"
         "</div>"
         "<script>"
@@ -231,6 +231,9 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         "</script></body></html>";
 
     httpd_resp_set_type(req, "text/html; charset=utf-8");
+    httpd_resp_set_hdr(req, "Cache-Control", "no-cache, no-store, must-revalidate");
+    httpd_resp_set_hdr(req, "Pragma", "no-cache");
+    httpd_resp_set_hdr(req, "Expires", "0");
     httpd_resp_send(req, html, strlen(html));
     return ESP_OK;
 }
